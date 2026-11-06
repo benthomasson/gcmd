@@ -55,3 +55,15 @@ def get_sheets_service() -> Resource:
     service = build("sheets", "v4", credentials=creds)
     return service
 
+
+def get_calendar_service() -> Resource:
+    """
+    Get an authenticated Google Calendar service instance.
+
+    Returns:
+        Resource: Google Calendar API service
+    """
+    creds = get_authenticated_credentials()
+    service = build("calendar", "v3", credentials=creds)
+    return service
+

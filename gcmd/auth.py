@@ -17,6 +17,7 @@ SCOPES = [
     "https://www.googleapis.com/auth/drive.file",
     "https://www.googleapis.com/auth/drive.metadata.readonly",
     "https://www.googleapis.com/auth/tasks.readonly",
+    "https://www.googleapis.com/auth/calendar.events.readonly",
 ]
 
 
@@ -100,7 +101,8 @@ def get_authenticated_credentials() -> Credentials:
             f"2. Enable required APIs:\n"
             f"   - Google Drive API: https://console.cloud.google.com/apis/library/drive.googleapis.com\n"
             f"   - Google Docs API: https://console.cloud.google.com/apis/library/docs.googleapis.com\n"
-            f"   - Google Tasks API: https://console.cloud.google.com/apis/library/tasks.googleapis.com\n\n"
+            f"   - Google Tasks API: https://console.cloud.google.com/apis/library/tasks.googleapis.com\n"
+            f"   - Google Calendar API: https://console.cloud.google.com/apis/library/calendar-json.googleapis.com\n\n"
             f"3. Download the credentials:\n"
             f"   - Click the download icon (⬇) next to your OAuth client\n"
             f"   - Save the JSON file as: {credentials_path}\n\n"

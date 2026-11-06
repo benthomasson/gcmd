@@ -8,6 +8,7 @@ from .docs import list_document_tabs, get_document_structure, format_tabs_output
 from .comments import list_comments, format_comments_output
 from .tasks import list_tasks, list_task_lists, format_task_list, format_task_lists
 from .sheets import export_spreadsheet_as_csv, list_sheets, format_sheets_output
+from .calendar import list_meetings_with_transcripts, format_meetings
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -165,6 +166,49 @@ def build_parser() -> argparse.ArgumentParser:
         help="Show all task lists instead of tasks",
     )
     tasks_parser.set_defaults(func=cmd_tasks)
+
+    # Calendar subcommand - list meetings and transcripts
+    cal_parser = subparsers.add_parser(
+        "calendar",
+        help="List recent meetings and find transcripts",
+        description="List Google Calendar meetings with Meet links and locate transcript documents",
+    )
+    cal_parser.add_argument(
+        "-d",
+        "--days",
+        type=int,
+        default=7,
+        help="Look back N days (default: 7)",
+    )
+    cal_parser.add_argument(
+        "-n",
+        "--max-results",
+        type=int,
+        default=100,
+        help="Maximum number of meetings (default: 100)",
+    )
+    cal_parser.add_argument(
+        "--calendar-id",
+        default="primary",
+        help="Calendar ID (default: primary)",
+    )
+    cal_parser.add_argument(
+        "-v",
+        "--verbose",
+        action="store_true",
+        help="Show attendees, organizer, and Meet link",
+    )
+    cal_parser.add_argument(
+        "--transcripts-only",
+        action="store_true",
+        help="Only show meetings that have a transcript",
+    )
+    cal_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Output as JSON (for machine consumption)",
+    )
+    cal_parser.set_defaults(func=cmd_calendar)
 
     return parser
 
@@ -433,6 +477,35 @@ def cmd_tasks(args: argparse.Namespace) -> int:
 
         if tasks:
             print(f"Found {len(tasks)} task(s)", file=sys.stderr)
+
+        return 0
+    except Exception as e:
+        print(f"Error: {e}", file=sys.stderr)
+        return 1
+
+
+def cmd_calendar(args: argparse.Namespace) -> int:
+    """Handle the 'calendar' subcommand."""
+    import json
+
+    try:
+        meetings = list_meetings_with_transcripts(
+            days=args.days,
+            max_results=args.max_results,
+            calendar_id=args.calendar_id,
+        )
+
+        if args.transcripts_only:
+            meetings = [m for m in meetings if m.get("transcript")]
+
+        if args.json:
+            print(json.dumps(meetings, indent=2, default=str))
+        else:
+            output = format_meetings(meetings, verbose=args.verbose)
+            print(output)
+
+        with_tx = sum(1 for m in meetings if m.get("transcript"))
+        print(f"Found {len(meetings)} meeting(s), {with_tx} with transcripts", file=sys.stderr)
 
         return 0
     except Exception as e:
